@@ -142,6 +142,7 @@ def show_prediction_labels_on_image(img_path, predictions):
     :return:
     """
     pil_image = Image.open(img_path).convert("RGB")
+
     draw = ImageDraw.Draw(pil_image)
 
     for name, (top, right, bottom, left) in predictions:
@@ -160,8 +161,20 @@ def show_prediction_labels_on_image(img_path, predictions):
     # Remove the drawing library from memory as per the Pillow docs
     del draw
 
+    path = os.path.dirname(img_path)
+
     # Display the resulting image
+    caminho = "output/{}".format(os.path.basename(path))
+
+    try:
+        os.makedirs(caminho)
+    except OSError:
+        print("Creation of the directory %s failed" % caminho)
+    else:
+        print("Successfully created the directory %s" % caminho)
+
     pil_image.show()
+    pil_image.save("{}/{}".format(caminho, image_file))
 
 
 if __name__ == "__main__":
@@ -173,6 +186,7 @@ if __name__ == "__main__":
 
     # STEP 2: Using the trained classifier, make predictions for unknown images
     for image_file in os.listdir("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_test"):
+
         full_file_path = os.path.join("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_test", image_file)
 
         print("Looking for faces in {}".format(image_file))
