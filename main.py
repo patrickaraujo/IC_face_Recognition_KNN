@@ -26,8 +26,10 @@ import os
 import os.path
 import pickle
 from PIL import Image, ImageDraw
-import face_recognition
+import face_recognition         #   reconhece
 from face_recognition.face_recognition_cli import image_files_in_folder
+import shutil
+import sys
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
@@ -63,8 +65,8 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
-            image = face_recognition.load_image_file(img_path)
-            face_bounding_boxes = face_recognition.face_locations(image)
+            image = face_recognition.load_image_file(img_path)              #   reconhece
+            face_bounding_boxes = face_recognition.face_locations(image)    #   reconhece
 
             if len(face_bounding_boxes) != 1:
                 # If there are no people (or too many people) in a training image, skip the image.
@@ -72,7 +74,7 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
                     print("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(face_bounding_boxes) < 1 else "Found more than one face"))
             else:
                 # Add face encoding for current image to the training set
-                X.append(face_recognition.face_encodings(image, known_face_locations=face_bounding_boxes)[0])
+                X.append(face_recognition.face_encodings(image, known_face_locations=face_bounding_boxes)[0])   #   encoding
                 y.append(class_dir)
 
     # Determine how many neighbors to use for weighting in the KNN classifier
@@ -124,7 +126,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
         return []
 
     # Find encodings for faces in the test iamge
-    faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)
+    faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)     #   face_recognition
 
     # Use the KNN model to find the best matches for the test face
     closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=1)
@@ -166,28 +168,65 @@ def show_prediction_labels_on_image(img_path, predictions):
     # Display the resulting image
     caminho = "output/{}".format(os.path.basename(path))
 
-    try:
-        os.makedirs(caminho)
-    except OSError:
-        print("Creation of the directory %s failed" % caminho)
-    else:
-        print("Successfully created the directory %s" % caminho)
+    criaDir(caminho)
 
     pil_image.show()
     pil_image.save("{}/{}".format(caminho, image_file))
 
+def criaDir (caminho):
+    try:
+        os.makedirs(caminho)
+    except OSError:
+        print('Creation of the directory "%s" failed' % caminho)
+    else:
+        print('Successfully created the directory "%s"' % caminho)
+
+def renomeia (caminho):
+    print("Renomeando...")
+    diretorio = "gt_db_renamed"
+    criaDir(diretorio)
+    for pasta in os.listdir(caminho):
+        subpasta = os.path.join(caminho, pasta)
+        cSP = format(os.path.basename(subpasta))
+        dest_dir = diretorio+"/"+cSP  #   cria a sub pasta no destino
+        criaDir(dest_dir)
+        # get the current working dir
+        #   src_dir = os.getcwd()
+        for image_file in os.listdir(subpasta):
+            src_file = os.path.join(subpasta, image_file)
+            shutil.copy(src_file, dest_dir)  # copy the file to destination dir
+            nomeF = cSP+"_"+image_file  #   nome final
+
+            dst_file = os.path.join(dest_dir, image_file)
+            new_dst_file_name = os.path.join(dest_dir, nomeF)
+
+            os.rename(dst_file, new_dst_file_name)  # rename
+
+            #   path = os.path.dirname(src_file)
+            #   print(src_file)
+            #   print("Arquivo: {}".format(image_file))
+
 
 if __name__ == "__main__":
+
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
+
+
+    amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
+    renomeia(amostras)
+    print(amostras)
+
+
     print("Training KNN classifier...")
     #classifier = train("/home/eduardo/Documents/IC - FaceDetection/Face-Recognition-KNN/gt_db_train", model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
     print("Training complete!")
 
     # STEP 2: Using the trained classifier, make predictions for unknown images
-    for image_file in os.listdir("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_test"):
+    camImg = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_test" #   caminho das imagens
+    for image_file in os.listdir(camImg):
 
-        full_file_path = os.path.join("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_test", image_file)
+        full_file_path = os.path.join(camImg, image_file)
 
         print("Looking for faces in {}".format(image_file))
 
@@ -200,4 +239,4 @@ if __name__ == "__main__":
             print("- Found {} at ({}, {})".format(name, left, top))
 
         # Display results overlaid on an image
-        show_prediction_labels_on_image(os.path.join("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_test", image_file), predictions)
+        show_prediction_labels_on_image(full_file_path, predictions)
