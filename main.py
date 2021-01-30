@@ -219,7 +219,7 @@ if __name__ == "__main__":
 
 
     print("Training KNN classifier...")
-    #classifier = train("/home/eduardo/Documents/IC - FaceDetection/Face-Recognition-KNN/gt_db_train", model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
+    #classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_train", model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
     print("Training complete!")
 
     # STEP 2: Using the trained classifier, make predictions for unknown images
