@@ -197,13 +197,16 @@ def remocao (caminho):
     except OSError as e:
         print("Error: %s : %s" % (caminho, e.strerror))
 
+def verificaDir(diretorio):
+    var = criaDir(diretorio)
+    if (not var):
+        remocao(diretorio)
+        criaDir(diretorio)
+
 def novoDir (caminho, diretorio):
     print("\nRenomeando...")
 
-    var = criaDir(diretorio)
-    if(not var):
-        remocao(diretorio)
-        criaDir(diretorio)
+    verificaDir(diretorio)
 
     for pasta in os.listdir(caminho):
         subpasta = os.path.join(caminho, pasta)
@@ -231,10 +234,8 @@ def criaDirTestes (caminho, qtd, diretorio):
     print("Movendo as imagens...")
     i = 1
 
-    var = criaDir(diretorio)
-    if (not var):
-        remocao(diretorio)
-        criaDir(diretorio)
+    verificaDir(diretorio)
+
     for pasta in os.listdir(caminho):
         subpasta = os.path.join(caminho, pasta)
         arrayImg = os.listdir(subpasta)
