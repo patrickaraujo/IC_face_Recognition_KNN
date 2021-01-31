@@ -21,6 +21,8 @@ $ pip3 install scikit-learn
 """
 
 import math
+from math import floor
+from random import sample
 from sklearn import neighbors
 import os
 import os.path
@@ -174,23 +176,41 @@ def show_prediction_labels_on_image(img_path, predictions):
     pil_image.save("{}/{}".format(caminho, image_file))
 
 def criaDir (caminho):
+    retorno = False
     try:
-        os.makedirs(caminho)
+        os.makedirs(caminho, mode=0o777, exist_ok=False)
     except OSError:
         print('Creation of the directory "%s" failed' % caminho)
     else:
         print('Successfully created the directory "%s"' % caminho)
+        retorno = True
+    return retorno
 
-def renomeia (caminho):
-    print("Renomeando...")
-    diretorio = "gt_db_renamed"
-    criaDir(diretorio)
+def handler(func, path, exc_info):
+    print("Inside handler")
+    print(exc_info)
+
+def remocao (caminho):
+    try:
+        #   shutil.rmtree(caminho, ignore_errors=True)
+        shutil.rmtree(caminho, onerror=handler)
+    except OSError as e:
+        print("Error: %s : %s" % (caminho, e.strerror))
+
+def novoDir (caminho, diretorio):
+    print("\nRenomeando...")
+
+    var = criaDir(diretorio)
+    if(not var):
+        remocao(diretorio)
+        criaDir(diretorio)
+
     for pasta in os.listdir(caminho):
         subpasta = os.path.join(caminho, pasta)
         cSP = format(os.path.basename(subpasta))
         dest_dir = diretorio+"/"+cSP  #   cria a sub pasta no destino
         criaDir(dest_dir)
-        # get the current working dir
+        #   get the current working dir
         #   src_dir = os.getcwd()
         for image_file in os.listdir(subpasta):
             src_file = os.path.join(subpasta, image_file)
@@ -206,6 +226,33 @@ def renomeia (caminho):
             #   print(src_file)
             #   print("Arquivo: {}".format(image_file))
 
+def criaDirTestes (caminho, qtd, diretorio):
+    print("\n\nCriando diretório de testes\n")
+    print("Movendo as imagens...")
+    i = 1
+
+    var = criaDir(diretorio)
+    if (not var):
+        remocao(diretorio)
+        criaDir(diretorio)
+    for pasta in os.listdir(caminho):
+        subpasta = os.path.join(caminho, pasta)
+        arrayImg = os.listdir(subpasta)
+        file_count = len(arrayImg)
+        qtdImg = floor((file_count*qtd)/100)
+        sortedArrayImg = sample(arrayImg, qtdImg)
+
+        for img in sortedArrayImg:
+            src_file = os.path.join(subpasta, img)
+            shutil.move(src_file, diretorio)  # copy the file to destination dir
+
+            dst_file = os.path.join(diretorio, img)
+            nomeArq = img.split(".")
+            formato = nomeArq[len(nomeArq)-1]
+            new_dst_file_name = os.path.join(diretorio, "teste_"+str(i)+"."+formato)
+
+            os.rename(dst_file, new_dst_file_name)  # rename
+            i += 1
 
 if __name__ == "__main__":
 
@@ -214,10 +261,11 @@ if __name__ == "__main__":
 
 
     amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
-    renomeia(amostras)
-    print(amostras)
+    renomeado = "gt_db_renamed"
+    novoDir(amostras, renomeado)
+    criaDirTestes(renomeado, 30, "dir_Testes")
 
-
+    
     print("Training KNN classifier...")
     #classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db_train", model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
     print("Training complete!")
