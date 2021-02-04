@@ -208,6 +208,8 @@ def novoDir (caminho, diretorio):
 
     verificaDir(diretorio)
 
+    i = 1
+
     for pasta in os.listdir(caminho):
         subpasta = os.path.join(caminho, pasta)
         cSP = format(os.path.basename(subpasta))
@@ -224,15 +226,18 @@ def novoDir (caminho, diretorio):
             new_dst_file_name = os.path.join(dest_dir, nomeF)
 
             os.rename(dst_file, new_dst_file_name)  # rename
-
+            i += 1
             #   path = os.path.dirname(src_file)
             #   print(src_file)
             #   print("Arquivo: {}".format(image_file))
+    return i
 
-def criaDirTestes (caminho, qtd, diretorio):
+def criaDirTreinamento (caminho, qtd, diretorio, tam):
     print("\n\nCriando diretório de testes\n")
     print("Movendo as imagens...")
     i = 1
+
+    tam = len(str(tam))
 
     verificaDir(diretorio)
 
@@ -250,7 +255,7 @@ def criaDirTestes (caminho, qtd, diretorio):
             dst_file = os.path.join(diretorio, img)
             nomeArq = img.split(".")
             formato = nomeArq[len(nomeArq)-1]
-            new_dst_file_name = os.path.join(diretorio, "teste_"+str(i)+"."+formato)
+            new_dst_file_name = os.path.join(diretorio, "teste_"+str(i).zfill(tam)+"."+formato)
 
             os.rename(dst_file, new_dst_file_name)  # rename
             i += 1
@@ -263,8 +268,8 @@ if __name__ == "__main__":
 
     amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
     renomeado = "gt_db_renamed"
-    novoDir(amostras, renomeado)
-    criaDirTestes(renomeado, 30, "dir_Testes")
+    tam = novoDir(amostras, renomeado)
+    criaDirTreinamento(renomeado, 70, "dir_Treinamento", tam)
 
     
     print("Training KNN classifier...")
