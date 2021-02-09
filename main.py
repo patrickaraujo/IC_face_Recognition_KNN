@@ -204,7 +204,7 @@ def verificaDir(diretorio):
         remocao(diretorio)
         criaDir(diretorio)
 
-def novoDir (caminho, diretorio, extensao):
+def novoDir (caminho, diretorio):
     print("\nRenomeando...")
 
     verificaDir(diretorio)
@@ -220,8 +220,9 @@ def novoDir (caminho, diretorio, extensao):
         #   src_dir = os.getcwd()
         for image_file in os.listdir(subpasta):
             fsp = image_file.split(".")
-            ext = "."+fsp[len(fsp)-1]
-            if ext == extensao:
+            ext = fsp[len(fsp) - 1]
+            #   ext = "."+fsp[len(fsp)-1]
+            if ext in ALLOWED_EXTENSIONS:
                 src_file = os.path.join(subpasta, image_file)
                 shutil.copy(src_file, dest_dir)  # copy the file to destination dir
                 nomeF = cSP+"_"+image_file  #   nome final
@@ -274,7 +275,7 @@ if __name__ == "__main__":
 
     amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
     renomeado = "gt_db_renamed"
-    tam = novoDir(amostras, renomeado, ".jpg")
+    tam = novoDir(amostras, renomeado)
     treino = True
     diretorioTreino = "dir"
     if treino:
@@ -285,7 +286,7 @@ if __name__ == "__main__":
 
     #   for x in range(3):
     print("Training KNN classifier...")
-    classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/"+renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
+    #   classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/"+renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
     print("Training complete!")
 
     # STEP 2: Using the trained classifier, make predictions for unknown images
