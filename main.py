@@ -20,10 +20,8 @@ NOTE: This example requires scikit-learn to be installed! You can install it wit
 $ pip3 install scikit-learn
 """
 
+from funcoesAdicionais import *
 import math
-from math import floor
-from math import ceil
-from random import sample
 from sklearn import neighbors
 import os
 import os.path
@@ -31,10 +29,7 @@ import pickle
 from PIL import Image, ImageDraw
 import face_recognition         #   reconhece
 from face_recognition.face_recognition_cli import image_files_in_folder
-import shutil
 import sys
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
 def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False):
@@ -139,7 +134,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]
 
 
-def show_prediction_labels_on_image(img_path, predictions):
+def show_prediction_labels_on_image(img_path, predictions, folder, image_file):
     """
     Shows the face recognition results visually.
     :param img_path: path to image to be recognized
@@ -166,144 +161,94 @@ def show_prediction_labels_on_image(img_path, predictions):
     # Remove the drawing library from memory as per the Pillow docs
     del draw
 
-    path = os.path.dirname(img_path)
-
     # Display the resulting image
-    caminho = "output/{}".format(os.path.basename(path))
-
-    criaDir(caminho)
-
     #   pil_image.show()
-    pil_image.save("{}/{}".format(caminho, image_file))
 
-def criaDir (caminho):
-    retorno = False
-    try:
-        os.makedirs(caminho, mode=0o777, exist_ok=False)
-    except OSError:
-        print('Creation of the directory "%s" failed' % caminho)
-    else:
-        print('Successfully created the directory "%s"' % caminho)
-        retorno = True
-    return retorno
+    pil_image.save("{}/{}".format(folder, image_file))
 
-def handler(func, path, exc_info):
-    print("Inside handler")
-    print(exc_info)
-
-def remocao (caminho):
-    try:
-        #   shutil.rmtree(caminho, ignore_errors=True)
-        shutil.rmtree(caminho, onerror=handler)
-    except OSError as e:
-        print("Error: %s : %s" % (caminho, e.strerror))
-
-def verificaDir(diretorio):
-    var = criaDir(diretorio)
-    if (not var):
-        remocao(diretorio)
-        criaDir(diretorio)
-
-def novoDir (caminho, diretorio):
-    print("\nRenomeando...")
-
-    verificaDir(diretorio)
-
-    i = 1
-
-    for pasta in os.listdir(caminho):
-        subpasta = os.path.join(caminho, pasta)
-        cSP = format(os.path.basename(subpasta))
-        dest_dir = diretorio+"/"+cSP  #   cria a sub pasta no destino
-        criaDir(dest_dir)
-        #   get the current working dir
-        #   src_dir = os.getcwd()
-        for image_file in os.listdir(subpasta):
-            fsp = image_file.split(".")
-            ext = fsp[len(fsp) - 1]
-            #   ext = "."+fsp[len(fsp)-1]
-            if ext in ALLOWED_EXTENSIONS:
-                src_file = os.path.join(subpasta, image_file)
-                shutil.copy(src_file, dest_dir)  # copy the file to destination dir
-                nomeF = cSP+"_"+image_file  #   nome final
-
-                dst_file = os.path.join(dest_dir, image_file)
-                new_dst_file_name = os.path.join(dest_dir, nomeF)
-
-                os.rename(dst_file, new_dst_file_name)  # rename
-                i += 1
-                #   path = os.path.dirname(src_file)
-                #   print(src_file)
-                #   print("Arquivo: {}".format(image_file))
-    return i
-
-def criaDirTreinamento (caminho, qtd, treino, diretorio, tam):
-    print("\n\nCriando diretório de testes\n")
-    print("Movendo as imagens...")
-    i = 1
-
-    tam = len(str(tam))
-
-    verificaDir(diretorio)
-
-    for pasta in os.listdir(caminho):
-        subpasta = os.path.join(caminho, pasta)
-        arrayImg = os.listdir(subpasta)
-        file_count = len(arrayImg)
-        qtdImg = floor((file_count*qtd)/100)
-        if treino:
-            qtdImg = ceil((file_count*qtd)/100)
-        sortedArrayImg = sample(arrayImg, qtdImg)
-
-        for img in sortedArrayImg:
-            src_file = os.path.join(subpasta, img)
-            shutil.move(src_file, diretorio)  # copy the file to destination dir
-
-            dst_file = os.path.join(diretorio, img)
-            nomeArq = img.split(".")
-            formato = nomeArq[len(nomeArq)-1]
-            new_dst_file_name = os.path.join(diretorio, "teste_"+str(i).zfill(tam)+"."+formato)
-
-            os.rename(dst_file, new_dst_file_name)  # rename
-            i += 1
-
-if __name__ == "__main__":
-
+def main():
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
 
-
     amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
     renomeado = "gt_db_renamed"
-    tam = novoDir(amostras, renomeado)
+    aT = novoDir(amostras, renomeado)
+
+    tam = len(aT)
+
+    #   imprimeImg("ONE", aT)
+
+    pastaData = pastaInfo(aT)
+
+    #   imprimePasta("PASTA 1", pastaData)
+
     treino = True
     diretorioTreino = "dir"
+
     if treino:
         diretorioTreino += "_Treino"
     else:
         diretorioTreino += "_Testes"
-    #   criaDirTreinamento(renomeado, 70, treino, diretorioTreino, tam)
 
-    #   for x in range(3):
-    print("Training KNN classifier...")
-    #   classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/"+renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
-    print("Training complete!")
+    porc = 70
 
-    # STEP 2: Using the trained classifier, make predictions for unknown images
-    camImg = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/"+diretorioTreino #   caminho das imagens
-    for image_file in os.listdir(camImg):
+    output = "output"
+    criaDir(output)
+    criaDirTreinamento(renomeado, porc, treino, diretorioTreino, aT, output+"/logs", "log_1.txt")
 
-        full_file_path = os.path.join(camImg, image_file)
 
-        print("Looking for faces in {}".format(image_file))
+    pastaData = pastaInfo(aT)
+    pastaData = sorted(pastaData, key=lambda h: h.nome)
 
-        # Find all people in the image using a trained classifier model
-        # Note: You can pass in either a classifier file name or a classifier model instance
-        predictions = predict(full_file_path, model_path="trained_knn_model_gtdb.clf")
 
-        # Print results on the console
-        for name, (top, right, bottom, left) in predictions:
-            print("- Found {} at ({}, {})".format(name, left, top))
+    inter = 2
 
-        # Display results overlaid on an image
-        show_prediction_labels_on_image(full_file_path, predictions)
+    loop = False
+    a2T = lerAP("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + renomeado)
+
+    for x in range(inter):
+
+        if inter > 1:
+            loop = True
+        n = x + 1
+
+        print("Execução:\t" + str(n))
+        print("Training KNN classifier...")
+
+        # classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
+
+        print("Training complete!")
+
+        # STEP 2: Using the trained classifier, make predictions for unknown images
+        camImg = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + diretorioTreino  # caminho das imagens
+
+
+        folder = output + "/{}".format(os.path.basename(diretorioTreino))
+        if loop:
+            folder = output + "/{}".format(os.path.basename(diretorioTreino)) + "/run_" + str(n)
+        criaDir(folder)
+
+        for image_file in os.listdir(camImg):
+            full_file_path = os.path.join(camImg, image_file)
+            #   path = os.path.dirname(full_file_path)
+            print("Looking for faces in {}".format(image_file))
+
+            # Find all people in the image using a trained classifier model
+            # Note: You can pass in either a classifier file name or a classifier model instance
+            predictions = predict(full_file_path, model_path="trained_knn_model_gtdb.clf")
+
+            # Print results on the console
+            for name, (top, right, bottom, left) in predictions:
+                print("-\tFound {} at ({}, {})".format(name, left, top))
+
+            #   Display results overlaid on an image
+            show_prediction_labels_on_image(full_file_path, predictions, folder, image_file)
+
+        pastaData = pastaInfo(aT)
+        pastaData = sorted(pastaData, key=lambda h: h.nome)
+
+        inteiro = permuta(aT, pastaData, inter, x, treino)
+        break
+
+if __name__ == "__main__":
+    main()
