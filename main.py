@@ -174,48 +174,48 @@ def main():
     renomeado = "gt_db_renamed"
     aT = novoDir(amostras, renomeado)
 
-    tam = len(aT)
+    # tam = len(aT)
 
-    #   imprimeImg("ONE", aT)
-
-    pastaData = pastaInfo(aT)
-
-    #   imprimePasta("PASTA 1", pastaData)
+    print("\nConfiguração inicial das pastas")
+    imprimeImg(aT)
 
     treino = True
-    diretorioTreino = "dir"
-
+    nomeDT = "dir"
+    nomeT = ""
     if treino:
-        diretorioTreino += "_Treino"
+        nomeT += "treino"
     else:
-        diretorioTreino += "_Testes"
-
+        nomeT += "testes"
+    diretorioTreino = nomeDT+"_"+nomeT.capitalize()
     porc = 70
 
+    i = 1
     output = "output"
     criaDir(output)
-    criaDirTreinamento(renomeado, porc, treino, diretorioTreino, aT, output+"/logs", "log_1.txt")
+    criaDirTreinamento(renomeado, porc, treino, diretorioTreino, nomeT, aT, output+"/logs", "log_"+str(i)+".txt")
+    i += 1
 
+    print("\nConfiguração das pastas após a criação do diretório de treinamento")
+    imprimeImg(aT)
 
     pastaData = pastaInfo(aT)
     pastaData = sorted(pastaData, key=lambda h: h.nome)
 
 
     inter = 2
-
     loop = False
-    a2T = lerAP("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + renomeado)
-
+    if inter > 1:
+        loop = True
+    aQ = []
+    notOk = False
     for x in range(inter):
 
-        if inter > 1:
-            loop = True
         n = x + 1
 
         print("Execução:\t" + str(n))
         print("Training KNN classifier...")
 
-        # classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
+        classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
 
         print("Training complete!")
 
@@ -247,8 +247,10 @@ def main():
         pastaData = pastaInfo(aT)
         pastaData = sorted(pastaData, key=lambda h: h.nome)
 
-        inteiro = permuta(aT, pastaData, inter, x, treino)
-        break
+
+        aQ, notOk  = permuta(aT, pastaData, inter, x, treino, aQ, notOk)
+        print("\nConfiguração das pastas após a permulta "+str(n))
+        imprimeImg(aT)
 
 if __name__ == "__main__":
     main()
