@@ -65,7 +65,7 @@ def novoDir (caminho, diretorio):
                     new_dst_file_name = os.path.join(dest_dir, nomeF)
 
                     os.rename(dst_file, new_dst_file_name)  # rename
-                    aT.append(Imagem(nomeF, new_dst_file_name, cSP, nomeF, new_dst_file_name, cSP, False))
+                    aT.append(Imagem(nomeF, new_dst_file_name, cSP, nomeF, new_dst_file_name, cSP, False, False))
                     #   path = os.path.dirname(src_file)
                     #   print(src_file)
                     #   print("Arquivo: {}".format(image_file))
@@ -119,7 +119,7 @@ def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtN
             var = findObject(arr[0], aT, arr[1], arr[2], arr[3])
             if not var:
                 arq = arr[0].split("_")
-                aT.append(Imagem(arr[0], caminho+"/"+arq[0]+"/"+arr[0], arq[0], arr[1], arr[2], arr[3], True))
+                aT.append(Imagem(arr[0], caminho+"/"+arq[0]+"/"+arr[0], arq[0], arr[1], arr[2], arr[3], True, True))
                 aT = sorted(aT, key=lambda h: h.nomeO)
         f.close()
     pastaInfo(aT)
@@ -131,19 +131,18 @@ def lerAP (diretorio):    #   lê arquivos da pasta e retorna um array com os en
         for img in os.listdir(full_path):
             full_file_path = os.path.join(full_path, img)
             folder = format(os.path.basename(full_path))
-            aI.append(Imagem(img, full_file_path, folder, img, full_file_path, folder, False))
+            aI.append(Imagem(img, full_file_path, folder, img, full_file_path, folder, False, False))
     return aI
 
-def permuta (aT, pastasL, inter, interA, treino, aQ, notOk):
+def permuta (aT, pastasL, inter, interA, done, aQ):
     for x in pastasL:
-        if interA == 0:
-            aQ, notOk = divInt(x.qtdT, inter)
+        aQ, notOk = divInt(x.qtdT, inter)
         if not(notOk):
             imagensT = []
             imagensTr = []
             for y in aT:
                 if (y.pastaO == x.nome):
-                    if (y.treino == treino):
+                    if (y.done == done and y.treino == done):
                         imagensTr.append(y)
                     else:
                         imagensT.append(y)
@@ -167,9 +166,10 @@ def permuta (aT, pastasL, inter, interA, treino, aQ, notOk):
                 sortedImagensTr[z].nomeM = sortedImagensTr[z].nomeO
                 sortedImagensTr[z].pastaM = sortedImagensTr[z].pastaO
                 sortedImagensTr[z].treino = not(sortedImagensTr[z].treino)
+                #   sortedImagensTr[z].done = not (sortedImagensTr[z].done)
 
-                print("1\t-\tFoi movido:\t"+diretorioTr+"\tpara\t"+fsp[0])
-                print("1\t-\tO arquivo:\t"+fsp[0]+"/"+nomePerm+"\tfoi renomeado para\t"+sortedImagensTr[z].nomeO+"\t"+str(sortedImagensTr[z].treino))
+                # print("1\t-\tFoi movido:\t"+diretorioTr+"\tpara\t"+fsp[0])
+                # print("1\t-\tO arquivo:\t"+fsp[0]+"/"+nomePerm+"\tfoi renomeado para\t"+sortedImagensTr[z].nomeO+"\t"+str(sortedImagensTr[z].treino)+"\t"+str(sortedImagensTr[z].done))
 
                 shutil.move(diretorioT, diretorioPerm)
 
@@ -178,10 +178,11 @@ def permuta (aT, pastasL, inter, interA, treino, aQ, notOk):
                 sortedImagensT[z].diretorioM = diretorioPerm + "/" + nomePerm
                 sortedImagensT[z].nomeM = nomePerm
                 sortedImagensT[z].pastaM = diretorioPerm
-                #   sortedImagensT[z].treino = not (sortedImagensTr[z].treino)
+                sortedImagensT[z].treino = not (sortedImagensT[z].treino)
+                sortedImagensT[z].done = True
 
-                print("2\t-\tFoi movido:\t" + diretorioT + "\tpara\t" + diretorioPerm)
-                print("2\t-\tO arquivo:\t" + diretorioPerm + "/" + sortedImagensT[z].nomeO + "\tfoi renomeado para\t" +nomePerm+"\t"+str(not(sortedImagensT[z].treino)))
+                # print("2\t-\tFoi movido:\t" + diretorioT + "\tpara\t" + diretorioPerm)
+                # print("2\t-\tO arquivo:\t" + diretorioPerm + "/" + sortedImagensT[z].nomeO + "\tfoi renomeado para\t" +nomePerm+"\t"+str(sortedImagensT[z].treino)+"\t"+str(sortedImagensT[z].done))
         else:
             print("A permuta falhou!\nAs interações não são suficientes para a execução")
             break
@@ -208,16 +209,17 @@ def findObject (nomeO, aT, nomeM, diretorioM, pastaM):
             x.diretorioM = diretorioM
             x.pastaM = pastaM
             x.treino = True
+            x.done = True
             return True
     return False
 
-def imprimeImg (aT):
+def imprimeImg (aT, separador):
     for obj in aT:
-            print(obj.nomeO, obj.diretorioO, obj.pastaO, obj.nomeM, obj.diretorioM, obj.pastaM, obj.treino, sep='\t-\t')
+        print(obj.nomeO, obj.diretorioO, obj.pastaO, obj.nomeM, obj.diretorioM, obj.pastaM, obj.treino, obj.done, sep=separador)
 
-def imprimePasta (pastaData):
+def imprimePasta (pastaData, separador):
     for obj in pastaData:
-        print(obj.nome, obj.qtd, obj.qtdT, obj.qtdTr, sep='\t-\t')
+        print(obj.nome, obj.qtd, obj.qtdT, obj.qtdTr, sep=separador)
 
 def divInt (num, div):
     arr = []

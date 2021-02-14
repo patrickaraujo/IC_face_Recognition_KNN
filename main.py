@@ -166,6 +166,23 @@ def show_prediction_labels_on_image(img_path, predictions, folder, image_file):
 
     pil_image.save("{}/{}".format(folder, image_file))
 
+def lookF_Faces (camImg, folder):
+    for image_file in os.listdir(camImg):
+        full_file_path = os.path.join(camImg, image_file)
+        #   path = os.path.dirname(full_file_path)
+        print("Looking for faces in {}".format(image_file))
+
+        # Find all people in the image using a trained classifier model
+        # Note: You can pass in either a classifier file name or a classifier model instance
+        predictions = predict(full_file_path, model_path="trained_knn_model_gtdb.clf")
+
+        # Print results on the console
+        for name, (top, right, bottom, left) in predictions:
+            print("-\tFound {} at ({}, {})".format(name, left, top))
+
+        #   Display results overlaid on an image
+        show_prediction_labels_on_image(full_file_path, predictions, folder, image_file)
+
 def main():
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
@@ -177,7 +194,8 @@ def main():
     # tam = len(aT)
 
     print("\nConfiguração inicial das pastas")
-    imprimeImg(aT)
+    separador = "\t"
+    imprimeImg(aT, separador)
 
     treino = True
     nomeDT = "dir"
@@ -196,18 +214,17 @@ def main():
     i += 1
 
     print("\nConfiguração das pastas após a criação do diretório de treinamento")
-    imprimeImg(aT)
+    imprimeImg(aT, separador)
 
     pastaData = pastaInfo(aT)
     pastaData = sorted(pastaData, key=lambda h: h.nome)
 
 
-    inter = 2
+    inter = 3
     loop = False
     if inter > 1:
         loop = True
     aQ = []
-    notOk = False
     for x in range(inter):
 
         n = x + 1
@@ -222,35 +239,20 @@ def main():
         # STEP 2: Using the trained classifier, make predictions for unknown images
         camImg = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + diretorioTreino  # caminho das imagens
 
-
         folder = output + "/{}".format(os.path.basename(diretorioTreino))
         if loop:
             folder = output + "/{}".format(os.path.basename(diretorioTreino)) + "/run_" + str(n)
         criaDir(folder)
 
-        for image_file in os.listdir(camImg):
-            full_file_path = os.path.join(camImg, image_file)
-            #   path = os.path.dirname(full_file_path)
-            print("Looking for faces in {}".format(image_file))
-
-            # Find all people in the image using a trained classifier model
-            # Note: You can pass in either a classifier file name or a classifier model instance
-            predictions = predict(full_file_path, model_path="trained_knn_model_gtdb.clf")
-
-            # Print results on the console
-            for name, (top, right, bottom, left) in predictions:
-                print("-\tFound {} at ({}, {})".format(name, left, top))
-
-            #   Display results overlaid on an image
-            show_prediction_labels_on_image(full_file_path, predictions, folder, image_file)
+        lookF_Faces(camImg, folder)
 
         pastaData = pastaInfo(aT)
         pastaData = sorted(pastaData, key=lambda h: h.nome)
 
 
-        aQ, notOk  = permuta(aT, pastaData, inter, x, treino, aQ, notOk)
+        aQ  = permuta(aT, pastaData, inter, x, treino, aQ)
         print("\nConfiguração das pastas após a permulta "+str(n))
-        imprimeImg(aT)
+        imprimeImg(aT, separador)
 
 if __name__ == "__main__":
     main()
