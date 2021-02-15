@@ -200,7 +200,7 @@ def pastaInfo (aT):
             pastas.add(x.pastaO)
     for y in pastas:
         lista.append(Pastas(y, folders.count(y), past.count(y)))
-    return lista
+    return lista.sort(key=lambda h: h.nome)
 
 def findObject (nomeO, aT, nomeM, diretorioM, pastaM):
     for x in aT:
@@ -225,15 +225,17 @@ def divInt (num, div):
     arr = []
     notOk = False
     if(num >= div and div != 0):
-        if(num % div != 0):
+        y = num / div
+        w = num % div
+        if(w != 0):
             for x in range(div):
-                if x == div-1:
-                    arr.append(floor(num / div)+1)
+                if x >= (div - w):
+                    arr.append(floor(y)+1)
                 else:
-                    arr.append(floor(num/div))
+                    arr.append(floor(y))
         else:
             for x in range(div):
-                arr.append(num / div)
+                arr.append(y)
     else:
         notOk = True
         print("Não foi possível atender a solicitação")
