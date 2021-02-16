@@ -144,7 +144,7 @@ def permuta (aT, pastasL, inter, interA, done, aQ):
                 if (y.pastaO == x.nome):
                     if (y.done == done and y.treino == done):
                         imagensTr.append(y)
-                    else:
+                    if (y.done != done and y.treino != done):
                         imagensT.append(y)
             sortedImagensT = sample(imagensT, int(aQ[interA]))
             sortedImagensTr = sample(imagensTr, int(aQ[interA]))
@@ -200,7 +200,8 @@ def pastaInfo (aT):
             pastas.add(x.pastaO)
     for y in pastas:
         lista.append(Pastas(y, folders.count(y), past.count(y)))
-    return lista.sort(key=lambda h: h.nome)
+    lista = sorted(lista, key=lambda h: h.nome)
+    return lista
 
 def findObject (nomeO, aT, nomeM, diretorioM, pastaM):
     for x in aT:
@@ -213,12 +214,20 @@ def findObject (nomeO, aT, nomeM, diretorioM, pastaM):
             return True
     return False
 
-def imprimeImg (aT, separador):
+def imprimeListImg (aT, separador):
     for obj in aT:
         print(obj.nomeO, obj.diretorioO, obj.pastaO, obj.nomeM, obj.diretorioM, obj.pastaM, obj.treino, obj.done, sep=separador)
 
-def imprimePasta (pastaData, separador):
+def imprimeImg (obj, separador):
+    if obj:
+        print(obj.nomeO, obj.diretorioO, obj.pastaO, obj.nomeM, obj.diretorioM, obj.pastaM, obj.treino, obj.done, sep=separador)
+
+def imprimeListPasta (pastaData, separador):
     for obj in pastaData:
+        print(obj.nome, obj.qtd, obj.qtdT, obj.qtdTr, sep=separador)
+
+def imprimePasta (obj, separador):
+    if obj:
         print(obj.nome, obj.qtd, obj.qtdT, obj.qtdTr, sep=separador)
 
 def divInt (num, div):

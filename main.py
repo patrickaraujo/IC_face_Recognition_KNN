@@ -195,7 +195,7 @@ def main():
 
     print("\nConfiguração inicial das pastas")
     separador = "\t"
-    imprimeImg(aT, separador)
+    imprimeListImg(aT, separador)
 
     treino = True
     nomeDT = "dir"
@@ -214,11 +214,7 @@ def main():
     i += 1
 
     print("\nConfiguração das pastas após a criação do diretório de treinamento")
-    imprimeImg(aT, separador)
-
-    pastaData = pastaInfo(aT)
-    pastaData = sorted(pastaData, key=lambda h: h.nome)
-
+    imprimeListImg(aT, separador)
 
     inter = 3
     loop = False
@@ -227,9 +223,7 @@ def main():
     aQ = []
     for x in range(inter):
 
-        n = x + 1
-
-        print("Execução:\t" + str(n))
+        print("Execução:\t" + str(x+1))
         print("Training KNN classifier...")
 
         classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
@@ -241,18 +235,18 @@ def main():
 
         folder = output + "/{}".format(os.path.basename(diretorioTreino))
         if loop:
-            folder = output + "/{}".format(os.path.basename(diretorioTreino)) + "/run_" + str(n)
+             folder = output + "/{}".format(os.path.basename(diretorioTreino)) + "/run_" + str(x+1)
         criaDir(folder)
 
         lookF_Faces(camImg, folder)
 
-        pastaData = pastaInfo(aT)
-        pastaData = sorted(pastaData, key=lambda h: h.nome)
+        if (x < inter-1):
+            pastaData = pastaInfo(aT)
 
-
-        aQ  = permuta(aT, pastaData, inter, x, treino, aQ)
-        print("\nConfiguração das pastas após a permulta "+str(n))
-        imprimeImg(aT, separador)
+            aQ  = permuta(aT, pastaData, inter-1, x, treino, aQ)
+            print(aQ)
+            print("\nConfiguração das pastas após a permulta "+str(x+1))
+            imprimeListImg(aT, separador)
 
 if __name__ == "__main__":
     main()
