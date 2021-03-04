@@ -166,11 +166,11 @@ def show_prediction_labels_on_image(img_path, predictions, folder, image_file):
 
     pil_image.save("{}/{}".format(folder, image_file))
 
-def lookF_Faces (camImg, folder):
+def lookF_Faces (camImg, folder, aT):
     for image_file in os.listdir(camImg):
         full_file_path = os.path.join(camImg, image_file)
         #   path = os.path.dirname(full_file_path)
-        print("Looking for faces in {}".format(image_file))
+        print("Looking for faces in {}".format(image_file), end ="\t")
 
         # Find all people in the image using a trained classifier model
         # Note: You can pass in either a classifier file name or a classifier model instance
@@ -178,7 +178,8 @@ def lookF_Faces (camImg, folder):
 
         # Print results on the console
         for name, (top, right, bottom, left) in predictions:
-            print("-\tFound {} at ({}, {})".format(name, left, top))
+            print("-\tFound {} at ({}, {})".format(name, left, top), end ="\t")
+            checkResults(aT, image_file, name)
 
         #   Display results overlaid on an image
         show_prediction_labels_on_image(full_file_path, predictions, folder, image_file)
@@ -224,7 +225,7 @@ def main():
     for x in range(inter):
 
         print("Execução:\t" + str(x+1))
-        print("Training KNN classifier...")
+        print("Training KNN classifier...", end ="\t")
 
         classifier = train("D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/" + renomeado, model_save_path="trained_knn_model_gtdb.clf", n_neighbors=3)
 
@@ -238,13 +239,12 @@ def main():
              folder = output + "/{}".format(os.path.basename(diretorioTreino)) + "/run_" + str(x+1)
         criaDir(folder)
 
-        lookF_Faces(camImg, folder)
+        lookF_Faces(camImg, folder, aT)
 
         if (x < inter-1):
             pastaData = pastaInfo(aT)
 
             aQ  = permuta(aT, pastaData, inter-1, x, treino, aQ)
-            print(aQ)
             print("\nConfiguração das pastas após a permulta "+str(x+1))
             imprimeListImg(aT, separador)
 

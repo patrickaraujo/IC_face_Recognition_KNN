@@ -249,3 +249,12 @@ def divInt (num, div):
         notOk = True
         print("Não foi possível atender a solicitação")
     return arr, notOk
+
+def checkResults (aT, nomeAtual, nomeId):
+    for x in aT:
+        if nomeAtual == x.nomeM:
+            if x.pastaO == nomeId:
+                print("-\t"+str(True))
+            else:
+                print("-\t"+str(False))
+            break
