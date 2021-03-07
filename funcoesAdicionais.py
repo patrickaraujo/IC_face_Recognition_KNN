@@ -115,7 +115,6 @@ def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtN
     else:
         arrayFiles = sorted(os.listdir(output), reverse=True)
 
-        # sys.exit("Sem arquivos na pasta")
         f = open(output + '/' + arrayFiles[0], 'r')
         linha = f.readlines()
         for img in os.listdir(diretorio):
@@ -273,10 +272,11 @@ def divInt (num, div):
     return arr, notOk
 
 def checkResults (aT, nomeAtual, nomeId):
+    retorno = "\t-\t"
     for x in aT:
         if nomeAtual == x.nomeM:
             if x.pastaO == nomeId:
-                print("-\t"+str(True))
-            else:
-                print("-\t"+str(False)+"\t-\t"+x.pastaO)
-            break
+                return (retorno+str(True)+"\t-\t"+x.pastaO+"Face Encontrada {}\t-\tAcertou".format(nomeId))
+            return (retorno+str(False)+"\t-\t"+x.pastaO+"Face Encontrada {}\t-\tErrou".format(nomeId))
+    retorno += str(None)+"\t-\t"+str(None)+"Face Nao Encontrada\t-\tErrou"
+    return retorno

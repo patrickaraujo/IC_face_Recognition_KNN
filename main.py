@@ -166,6 +166,11 @@ def show_prediction_labels_on_image(img_path, predictions, folder, image_file):
 
     pil_image.save("{}/{}".format(folder, image_file))
 
+def interrupcao ():
+    entrada = input('Deseja continuar?\n1\t-\tpara continuar\nOutro\t-\tTerminar\nOpção:\t')
+    if entrada != '1':
+        sys.exit("Fim do programa")
+
 def lookF_Faces (camImg, folder, aT):
     for image_file in os.listdir(camImg):
         full_file_path = os.path.join(camImg, image_file)
@@ -178,15 +183,14 @@ def lookF_Faces (camImg, folder, aT):
 
         # Print results on the console
         for name, (top, right, bottom, left) in predictions:
-            print("-\tFound {} at ({}, {})".format(name, left, top), end ="\t")
-            checkResults(aT, image_file, name)
+            print("-\tFound {} at ({}, {}){}".format(name, left, top, checkResults(aT, image_file, name)))
 
         #   Display results overlaid on an image
         show_prediction_labels_on_image(full_file_path, predictions, folder, image_file)
 
 def main():
 
-    erase = False
+    erase = True
 
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
@@ -227,6 +231,8 @@ def main():
     verificaDir(outputLogs, erase)
     aT = criaDirTreinamento(renomeado, porc, treino, diretorioTreino, nomeT, aT, outputLogs, "log_run_" + str(i) + ".txt", erase)
 
+    interrupcao()
+
     print("\nConfiguração das pastas após a criação do diretório de treinamento")
     imprimeListImg(aT, separador)
     exportListImg(aT, "\t", outputLogs+"/log_run_" + str(i) + ".txt")
@@ -257,8 +263,8 @@ def main():
 
         if (x < inter-1):
             pastaData = pastaInfo(aT)
-
             aQ  = permuta(aT, pastaData, inter-1, x, treino, aQ)
+            interrupcao()
             print("\nConfiguração das pastas após a permulta "+str(x+1))
             imprimeListImg(aT, separador)
             exportListImg(aT, "\t", outputLogs + "/log_run_" + str(i) + ".txt")
