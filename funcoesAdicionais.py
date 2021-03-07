@@ -276,7 +276,7 @@ def checkResults (aT, nomeAtual, nomeId):
     for x in aT:
         if nomeAtual == x.nomeM:
             if x.pastaO == nomeId:
-                return (retorno+str(True)+"\t-\t"+x.pastaO+"Face Encontrada {}\t-\tAcertou".format(nomeId))
-            return (retorno+str(False)+"\t-\t"+x.pastaO+"Face Encontrada {}\t-\tErrou".format(nomeId))
-    retorno += str(None)+"\t-\t"+str(None)+"Face Nao Encontrada\t-\tErrou"
+                return (retorno+str(True)+"\t-\t"+x.pastaO+"\t-\tFace Encontrada {}\t-\tAcertou".format(nomeId))
+            return (retorno+str(False)+"\t-\t"+x.pastaO+"\t-\tFace Encontrada {}\t-\tErrou".format(nomeId))
+    retorno += str(None)+"\t-\t"+str(None)+"\t-\tFace Nao Encontrada\t-\tErrou"
     return retorno

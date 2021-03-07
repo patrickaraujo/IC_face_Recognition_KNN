@@ -167,8 +167,9 @@ def show_prediction_labels_on_image(img_path, predictions, folder, image_file):
     pil_image.save("{}/{}".format(folder, image_file))
 
 def interrupcao ():
+    num = "1"
     entrada = input('Deseja continuar?\n1\t-\tpara continuar\nOutro\t-\tTerminar\nOpção:\t')
-    if entrada != '1':
+    if entrada != num:
         sys.exit("Fim do programa")
 
 def lookF_Faces (camImg, folder, aT):
