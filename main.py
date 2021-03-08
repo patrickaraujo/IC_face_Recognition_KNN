@@ -166,17 +166,18 @@ def show_prediction_labels_on_image(img_path, predictions, folder, image_file):
 
     pil_image.save("{}/{}".format(folder, image_file))
 
-def interrupcao ():
-    num = "1"
-    entrada = input('Deseja continuar?\n1\t-\tpara continuar\nOutro\t-\tTerminar\nOpção:\t')
-    if entrada != num:
-        sys.exit("Fim do programa")
+def interrupcao (interromper):
+    if interromper:
+        num = "1"
+        entrada = input('Deseja continuar?\n1\t-\tpara continuar\nOutro\t-\tTerminar\nOpção:\t')
+        if entrada != num:
+            sys.exit("Fim do programa")
 
 def lookF_Faces (camImg, folder, aT):
     for image_file in os.listdir(camImg):
         full_file_path = os.path.join(camImg, image_file)
         #   path = os.path.dirname(full_file_path)
-        print("Looking for faces in {}".format(image_file), end ="\t")
+        print("Looking for faces in {}".format(image_file), end ="")
 
         # Find all people in the image using a trained classifier model
         # Note: You can pass in either a classifier file name or a classifier model instance
@@ -184,30 +185,24 @@ def lookF_Faces (camImg, folder, aT):
 
         # Print results on the console
         for name, (top, right, bottom, left) in predictions:
-            print("-\tFound {} at ({}, {}){}".format(name, left, top, checkResults(aT, image_file, name)))
-
+            print("\t-\tFound {} at ({}, {}){}".format(name, left, top, checkResults(aT, image_file, name)), end ="")
+        print()
         #   Display results overlaid on an image
         show_prediction_labels_on_image(full_file_path, predictions, folder, image_file)
 
-def main():
-
-    erase = True
+def main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, treino, interromper):
 
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
 
-    amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
-    renomeado = "gt_db_renamed"
-
-    aT = novoDir(amostras, renomeado, erase)
+    aT = novoDir(amostras, renomeado, erase, diminuiT, div)
 
     # tam = len(aT)
 
     print("\nConfiguração inicial das pastas")
-    separador = "\t"
+
     imprimeListImg(aT, separador)
 
-    treino = True
     nomeDT = "dir"
     nomeT = ""
 
@@ -215,8 +210,8 @@ def main():
         nomeT += "treino"
     else:
         nomeT += "testes"
+
     diretorioTreino = nomeDT+"_"+nomeT.capitalize()
-    porc = 70
 
     i = 1
 
@@ -230,19 +225,21 @@ def main():
         loop = True
 
     verificaDir(outputLogs, erase)
-    aT = criaDirTreinamento(renomeado, porc, treino, diretorioTreino, nomeT, aT, outputLogs, "log_run_" + str(i) + ".txt", erase)
-
-    interrupcao()
+    if contrl:
+        diminuiT = not diminuiT
+    aT = criaDirTreinamento(renomeado, porc, treino, diretorioTreino, nomeT, aT, outputLogs, "log_run_" + str(i) + ".txt", erase, diminuiT, div)
 
     print("\nConfiguração das pastas após a criação do diretório de treinamento")
     imprimeListImg(aT, separador)
-    exportListImg(aT, "\t", outputLogs+"/log_run_" + str(i) + ".txt")
+    exportListImg(aT, separador, outputLogs+"/log_run_" + str(i) + ".txt")
 
     i += 1
 
     aQ = []
 
     for x in range(inter):
+
+        interrupcao(interromper)
 
         print("Execução:\t" + str(x+1))
         print("Training KNN classifier...", end ="\t")
@@ -265,11 +262,22 @@ def main():
         if (x < inter-1):
             pastaData = pastaInfo(aT)
             aQ  = permuta(aT, pastaData, inter-1, x, treino, aQ)
-            interrupcao()
             print("\nConfiguração das pastas após a permulta "+str(x+1))
             imprimeListImg(aT, separador)
-            exportListImg(aT, "\t", outputLogs + "/log_run_" + str(i) + ".txt")
+            exportListImg(aT, separador, outputLogs + "/log_run_" + str(i) + ".txt")
             i += 1
 
 if __name__ == "__main__":
-    main()
+    erase = True        #   apaga os registros antigos
+    div = 2             #   valor para dividir as imagens
+    contrl = False      #   decide se diminui ou não as imagens
+    diminuiT = False    #   caso verdadeiro só diminui todas as imagens, caso falso só as imagens de testes
+    porc = 70           #   porcentagem de imagens que vão para treino
+    separador = "\t"    #   separador da impressão
+    amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
+    renomeado = "gt_db_renamed"
+    treino = True
+    interromper = False
+    if not contrl:
+        diminuiT = False
+    main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, treino, interromper)

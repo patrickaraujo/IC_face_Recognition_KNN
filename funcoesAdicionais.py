@@ -1,6 +1,7 @@
 from math import floor
 from math import ceil
 from random import sample
+from PIL import Image
 import shutil
 import os
 import os.path
@@ -39,7 +40,7 @@ def verificaDir(diretorio, erase):
          var = criaDir(diretorio)
     return var
 
-def novoDir (caminho, diretorio, erase):
+def novoDir (caminho, diretorio, erase, contrl, div):
     aT = []
     print("\nRenomeando...")
 
@@ -63,10 +64,14 @@ def novoDir (caminho, diretorio, erase):
                     nomeF = cSP+"_"+image_file  #   nome final
 
                     dst_file = os.path.join(dest_dir, image_file)
+                    os.chmod(dst_file, 0o777)
+                    if contrl:
+                        resizeImg(dst_file, div)
+
                     new_dst_file_name = os.path.join(dest_dir, nomeF)
 
                     os.rename(dst_file, new_dst_file_name)  # rename
-                    os.chmod(new_dst_file_name, 0o777)
+
                     aT.append(Imagem(nomeF, new_dst_file_name, cSP, nomeF, new_dst_file_name, cSP, False, False))
                     #   path = os.path.dirname(src_file)
                     #   print(src_file)
@@ -75,7 +80,7 @@ def novoDir (caminho, diretorio, erase):
         aT = lerAP(diretorio)
     return aT
 
-def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtNome, erase):
+def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtNome, erase, contrl, div):
     array = aT
 
     print("\n\nCriando diretório de testes\n")
@@ -112,6 +117,13 @@ def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtN
                 findObject(img, array, novoNome, new_dst_file_name, diretorio)
 
                 i += 1
+            if contrl:
+                for img in arrayImg:
+                    if img not in sortedArrayImg:
+                        src_file = os.path.join(subpasta, img)
+                        resizeImg(src_file, div)
+
+
     else:
         arrayFiles = sorted(os.listdir(output), reverse=True)
 
@@ -280,3 +292,12 @@ def checkResults (aT, nomeAtual, nomeId):
             return (retorno+str(False)+"\t-\t"+x.pastaO+"\t-\tFace Encontrada {}\t-\tErrou".format(nomeId))
     retorno += str(None)+"\t-\t"+str(None)+"\t-\tFace Nao Encontrada\t-\tErrou"
     return retorno
+
+def resizeImg (arq, div):
+    if(div > 0):
+        img = Image.open(arq)
+        width, height = img.size
+        width = int(width/div)
+        height = int(height / div)
+        new_img = img.resize((width, height))
+        new_img.save(arq, "JPEG", optimize=True)
