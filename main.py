@@ -190,12 +190,12 @@ def lookF_Faces (camImg, folder, aT):
         #   Display results overlaid on an image
         show_prediction_labels_on_image(full_file_path, predictions, folder, image_file)
 
-def main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, treino, interromper):
+def main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, treino, interromper, reset):
 
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
 
-    aT = novoDir(amostras, renomeado, erase, diminuiT, div)
+    aT = novoDir(amostras, renomeado, erase, diminuiT, div, reset)
 
     # tam = len(aT)
 
@@ -227,7 +227,7 @@ def main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, tre
     verificaDir(outputLogs, erase)
     if contrl:
         diminuiT = not diminuiT
-    aT = criaDirTreinamento(renomeado, porc, treino, diretorioTreino, nomeT, aT, outputLogs, "log_run_" + str(i) + ".txt", erase, diminuiT, div)
+    aT = criaDirTreinamento(renomeado, porc, treino, diretorioTreino, nomeT, aT, outputLogs, "log_run_" + str(i) + ".txt", erase, diminuiT, div, reset)
 
     print("\nConfiguração das pastas após a criação do diretório de treinamento")
     imprimeListImg(aT, separador)
@@ -269,9 +269,10 @@ def main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, tre
 
 if __name__ == "__main__":
     erase = True        #   apaga os registros antigos
-    div = 2             #   valor para dividir as imagens
-    contrl = False      #   decide se diminui ou não as imagens
-    diminuiT = False    #   caso verdadeiro só diminui todas as imagens, caso falso só as imagens de testes
+    div = 8             #   valor para dividir as imagens
+    contrl = True      #   decide se diminui ou não as imagens
+    diminuiT = True    #   caso verdadeiro só diminui todas as imagens, caso falso só as imagens de testes
+    reset = True       #   caso verdadeiro a imagem volta ao tamanho original
     porc = 70           #   porcentagem de imagens que vão para treino
     separador = "\t"    #   separador da impressão
     amostras = "D:/Documentos/PycharmProjects/face_Recognition_KNNEDUARDO/gt_db"
@@ -280,4 +281,4 @@ if __name__ == "__main__":
     interromper = False
     if not contrl:
         diminuiT = False
-    main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, treino, interromper)
+    main(erase, div, contrl, diminuiT, porc, separador, amostras, renomeado, treino, interromper, reset)

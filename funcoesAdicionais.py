@@ -40,7 +40,7 @@ def verificaDir(diretorio, erase):
          var = criaDir(diretorio)
     return var
 
-def novoDir (caminho, diretorio, erase, contrl, div):
+def novoDir (caminho, diretorio, erase, contrl, div, reset):
     aT = []
     print("\nRenomeando...")
 
@@ -66,7 +66,8 @@ def novoDir (caminho, diretorio, erase, contrl, div):
                     dst_file = os.path.join(dest_dir, image_file)
                     os.chmod(dst_file, 0o777)
                     if contrl:
-                        resizeImg(dst_file, div)
+                        width, height = adImg(dst_file, 0, 0, div, reset)
+                        adImg(dst_file, width, height, 0, reset)
 
                     new_dst_file_name = os.path.join(dest_dir, nomeF)
 
@@ -80,7 +81,7 @@ def novoDir (caminho, diretorio, erase, contrl, div):
         aT = lerAP(diretorio)
     return aT
 
-def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtNome, erase, contrl, div):
+def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtNome, erase, contrl, div, reset):
     array = aT
 
     print("\n\nCriando diretório de testes\n")
@@ -120,8 +121,8 @@ def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtN
             if contrl:
                 for img in arrayImg:
                     if img not in sortedArrayImg:
-                        src_file = os.path.join(subpasta, img)
-                        resizeImg(src_file, div)
+                        width, height = adImg(src_file, 0, 0,div, reset)
+                        adImg(src_file, width, height, 0, reset)
 
 
     else:
@@ -293,11 +294,18 @@ def checkResults (aT, nomeAtual, nomeId):
     retorno += str(None)+"\t-\t"+str(None)+"\t-\tFace Nao Encontrada\t-\tErrou"
     return retorno
 
-def resizeImg (arq, div):
+def adImg (arq, width, height, div, reset): #   Aumenta ou diminui
+    img = Image.open(arq)
+    widthO, heightO = img.size
     if(div > 0):
-        img = Image.open(arq)
-        width, height = img.size
-        width = int(width/div)
-        height = int(height / div)
-        new_img = img.resize((width, height))
-        new_img.save(arq, "JPEG", optimize=True)
+        width = int(widthO / div)
+        height = int(heightO / div)
+        resizeImg(img, arq, width, height)
+    else:
+        if reset:
+            resizeImg(img, arq, width, height)
+    return widthO, heightO
+
+def resizeImg (img, arq , width, height):
+    new_img = img.resize((width, height))
+    new_img.save(arq, "JPEG", optimize=True)
