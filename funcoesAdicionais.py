@@ -22,7 +22,7 @@ def criaDir (caminho):
         retorno = True
     return retorno
 
-def handler(func, path, exc_info):
+def handler(exc_info):
     print("Inside handler")
     print(exc_info)
 
@@ -40,8 +40,7 @@ def verificaDir(diretorio, erase):
          var = criaDir(diretorio)
     return var
 
-def novoDir (caminho, diretorio, erase, contrl, div, reset):
-    aT = []
+def novoDirRenomeia (caminho, diretorio, erase):
     print("\nRenomeando...")
 
     var = verificaDir(diretorio, erase)
@@ -65,23 +64,39 @@ def novoDir (caminho, diretorio, erase, contrl, div, reset):
 
                     dst_file = os.path.join(dest_dir, image_file)
                     os.chmod(dst_file, 0o777)
-                    if contrl:
-                        width, height = adImg(dst_file, 0, 0, div, reset)
-                        adImg(dst_file, width, height, 0, reset)
 
                     new_dst_file_name = os.path.join(dest_dir, nomeF)
 
                     os.rename(dst_file, new_dst_file_name)  # rename
-
-                    aT.append(Imagem(nomeF, new_dst_file_name, cSP, nomeF, new_dst_file_name, cSP, False, False))
                     #   path = os.path.dirname(src_file)
                     #   print(src_file)
                     #   print("Arquivo: {}".format(image_file))
+
+def criaDirTestes (caminho, diretorio, erase, contrl, div, reset):
+    aT = []
+
+    var = verificaDir(diretorio, erase)
+
+    if (var):
+        for pasta in os.listdir(caminho):
+            subpasta = os.path.join(caminho, pasta)
+            cSP = format(os.path.basename(subpasta))
+            dest_dir = diretorio + "/" + cSP  # cria a sub pasta no destino
+            criaDir(dest_dir)
+            for image_file in os.listdir(subpasta):
+                src_file = os.path.join(subpasta, image_file)
+                shutil.copy(src_file, dest_dir)  # copy the file to destination dir
+                dst_file = os.path.join(dest_dir, image_file)
+                os.chmod(dst_file, 0o777)
+                if contrl:
+                    width, height = adImg(dst_file, 0, 0, div, reset)
+                    adImg(dst_file, width, height, 0, reset)
+                aT.append(Imagem(image_file, dst_file, cSP, image_file, dst_file, cSP, False, False))
     else:
         aT = lerAP(diretorio)
     return aT
 
-def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtNome, erase, contrl, div, reset):
+def criaDirTreinamento (caminho, qtd, diretorio, nomeT, aT, output, erase, contrl, div, reset):
     array = aT
 
     print("\n\nCriando diretório de testes\n")
@@ -93,14 +108,12 @@ def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtN
     var = verificaDir(diretorio, erase)
 
     if var:
-        arqExport = output + '/' + txtNome
         for pasta in os.listdir(caminho):
             subpasta = os.path.join(caminho, pasta)
             arrayImg = os.listdir(subpasta)
             file_count = len(arrayImg)
-            qtdImg = floor((file_count*qtd)/100)
-            if treino:
-                qtdImg = ceil((file_count*qtd)/100)
+            qtdImg = ceil((file_count*qtd)/100)
+
             sortedArrayImg = sample(arrayImg, qtdImg)
 
             for img in sortedArrayImg:
@@ -121,6 +134,7 @@ def criaDirTreinamento (caminho, qtd, treino, diretorio, nomeT, aT, output, txtN
             if contrl:
                 for img in arrayImg:
                     if img not in sortedArrayImg:
+                        src_file = os.path.join(subpasta, img)
                         width, height = adImg(src_file, 0, 0,div, reset)
                         adImg(src_file, width, height, 0, reset)
 
@@ -153,7 +167,7 @@ def lerAP (diretorio):    #   lê arquivos da pasta e retorna um array com os en
             aI.append(Imagem(img, full_file_path, pasta, img, full_file_path, pasta, False, False))
     return aI
 
-def permuta (aT, pastasL, inter, interA, done, aQ):
+def permuta (aT, pastasL, inter, interA, done, aQ, contrl, div, reset, amostras):
     for x in pastasL:
         aQ, notOk = divInt(x.qtdT, inter)
         if not(notOk):
@@ -177,10 +191,14 @@ def permuta (aT, pastasL, inter, interA, done, aQ):
                 pastD = fsp[0]+"/"+fsp[1]  #   pasta destino
                 shutil.move(diretorioTr, pastD)
 
-                nDM = pastD+"/"+nomePerm   # novo diretório com nome modificado
-                nDO = pastD + "/" + sortedImagensTr[z].nomeO  # novo diretório com nome original
+                pNDM = pastD+"/"+nomePerm   # primeiro novo diretório com nome modificado
+                pNDO = pastD + "/" + sortedImagensTr[z].nomeO  # primeiro novo diretório com nome original
 
-                os.rename(nDM, nDO)
+                os.rename(pNDM, pNDO)
+
+                if contrl:
+                    width, height = adImg(pNDO, 0, 0, div, reset)
+                    adImg(pNDO, width, height, 0, reset)
 
                 diretorioPerm = sortedImagensTr[z].pastaM
 
@@ -193,11 +211,22 @@ def permuta (aT, pastasL, inter, interA, done, aQ):
                 # print("1\t-\tFoi movido:\t"+diretorioTr+"\tpara\t"+fsp[0])
                 # print("1\t-\tO arquivo:\t"+fsp[0]+"/"+nomePerm+"\tfoi renomeado para\t"+sortedImagensTr[z].nomeO+"\t"+str(sortedImagensTr[z].treino)+"\t"+str(sortedImagensTr[z].done))
 
-                shutil.move(diretorioT, diretorioPerm)
+                if contrl:
+                    if os.path.exists(diretorioT):
+                        os.remove(diretorioT)
+                    else:
+                        print("The file does not exist")
+                    diretorioT = amostras+"/"+sortedImagensT[z].pastaO+"/"+sortedImagensT[z].nomeO
+                    shutil.copy(diretorioT, diretorioPerm)
+                else:
+                    shutil.move(diretorioT, diretorioPerm)
 
-                os.rename(diretorioPerm+"/"+sortedImagensT[z].nomeO, diretorioPerm+"/"+nomePerm)
+                sNDM = diretorioPerm+"/"+sortedImagensT[z].nomeO    #   segundo novo diretório com nome modificado
+                sNDO = diretorioPerm+"/"+nomePerm                   #   segundo novo diretório com nome original
 
-                sortedImagensT[z].diretorioM = diretorioPerm + "/" + nomePerm
+                os.rename(sNDM, sNDO)
+
+                sortedImagensT[z].diretorioM = sNDO
                 sortedImagensT[z].nomeM = nomePerm
                 sortedImagensT[z].pastaM = diretorioPerm
                 sortedImagensT[z].treino = not (sortedImagensT[z].treino)
