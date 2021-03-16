@@ -260,10 +260,10 @@ def main(erase, div, contrl, diminuiT, porc, separador, amostras, diretorioTrein
 
 if __name__ == "__main__":
     erase = True        #   apaga os registros antigos
-    div = 2             #   valor para dividir as imagens
+    div = 8             #   valor para dividir as imagens
     contrl = True       #   decide se diminui ou não as imagens
-    diminuiT = False     #   caso verdadeiro só diminui todas as imagens, caso falso só as imagens de testes
-    reset = False        #   caso verdadeiro a imagem volta ao tamanho original
+    diminuiT = False    #   caso verdadeiro só diminui todas as imagens, caso falso só as imagens de testes
+    reset = True       #   caso verdadeiro a imagem volta ao tamanho original
     porc = 70           #   porcentagem de imagens que vão para treino
     separador = "\t"    #   separador da impressão
 
