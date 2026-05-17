@@ -1,0 +1,5 @@
+face-recognition
+face_recognition_models @ git+https://github.com/ageitgey/face_recognition_models
+setuptools<82
+scikit-learn
+Pillow
