@@ -202,10 +202,10 @@ Ao terminar, a `--workdir` conterá os modelos KNN treinados, as imagens
 de teste anotadas (com caixas e nomes) e a pasta `logs/`. Os arquivos
 gerados são:
 
-- `run_info.txt`: parâmetros do experimento, caminhos, hora de início,
-  hora de fim e duração total. O mesmo conteúdo é impresso no console
-  no início e no final da execução — útil para reprodutibilidade e
-  para registrar o tempo gasto;
+- `run_info.txt`: parâmetros do experimento, ambiente, caminho absoluto
+  do dataset, hora de início, hora de fim, duração total e tempo de
+  **cada execução individual**. O mesmo conteúdo é impresso no console
+  como banner no início e rodapé no final;
 - `predictions_run_N.txt`: predição de cada imagem testada;
 - `metrics_run_N_summary.txt`: resumo legível com acurácia, erros de
   identificação, rejeições, falhas de detecção, classes com pior recall

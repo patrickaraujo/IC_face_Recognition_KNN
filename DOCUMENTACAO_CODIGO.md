@@ -64,6 +64,7 @@ experiment.py
 face_knn.py
 dataset_utils.py
 metrics.py
+run_report.py
 models.py
 requirements.txt
 README.md
@@ -229,19 +230,30 @@ output/face_knn/
 ### Configurações da execução (`run_info.txt`)
 
 O arquivo `run_info.txt` registra os parâmetros usados no experimento,
-os caminhos envolvidos, a hora de início, a hora de fim e a duração
-total. O mesmo conteúdo é impresso no console no início e no final
-da execução, garantindo que cada experimento seja autoexplicativo.
+os caminhos envolvidos, o ambiente, e os tempos. O mesmo conteúdo é
+impresso no console em dois momentos: banner no início (parâmetros +
+hora de início) e rodapé no final (tempos por execução + total).
 
-Inclui:
+O arquivo é dividido em quatro seções:
 
-- caminho do `--dataset` original e do dataset em uso (que pode ser a
-  cópia renomeada, em `dataset_renomeado/`);
-- caminhos de `--workdir`, `dir_Treino` e `dir_Testes`;
-- valores de `--porc`, `--inter`, `--n-neighbors`, `--distance-threshold`,
-  `--seed` e do esquema de redimensionamento;
-- timestamps de início e fim no formato `YYYY-MM-DD HH:MM:SS`;
-- duração total formatada (segundos, minutos ou horas conforme o caso).
+- **[Configurações]**: caminho absoluto do `--dataset`, do `--workdir`,
+  valores de `--porc`, `--inter`, `--n-neighbors`, `--distance-threshold`,
+  `--seed` e descrição do esquema de redimensionamento. Inclui ainda
+  o caminho do dataset efetivamente lido (que pode ser a cópia
+  renomeada, em `dataset_renomeado/`) quando ele difere do original.
+- **[Ambiente]**: versão do Python, sistema operacional e arquitetura
+  da máquina, úteis para reprodutibilidade.
+- **[Tempos]**: hora de início, hora de término e duração total formatada
+  como `HH:MM:SS.ms`.
+- **[Tempos por execução]**: tabela TSV com uma linha por execução,
+  contendo número da run, início, fim, duração e quantidade de imagens
+  avaliadas. Permite ver, por exemplo, se a primeira execução foi mais
+  lenta que as seguintes (efeito de aquecimento de caches do `face_recognition`).
+
+A implementação fica em `run_report.py`, na classe `RunReport`. A
+captura de tempo usa `time.perf_counter()` (monotônico, sem influência
+de mudanças de relógio do sistema) e os timestamps legíveis usam
+`datetime.now()`.
 
 ### Logs de estado
 

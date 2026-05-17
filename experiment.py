@@ -144,7 +144,9 @@ def look_for_faces(
 
 def run_experiment(config: ExperimentConfig) -> None:
     """Executa o pipeline completo."""
-    started_at = datetime.now()
+    report = RunReport.start(config)
+    report.print_header()
+
     rng = random.Random(config.random_seed)
 
     ensure_empty_dir(config.work_dir, erase=config.erase)
@@ -154,6 +156,7 @@ def run_experiment(config: ExperimentConfig) -> None:
     if config.rename_input:
         renamed_dir = config.work_dir / "dataset_renomeado"
         dataset_to_use = renomeia_dataset(config.dataset_dir, renamed_dir, erase=True)
+    report.set_dataset_used(dataset_to_use)
 
     # Diretórios derivados
     dir_treino = config.work_dir / config.dir_treino_name
@@ -165,16 +168,6 @@ def run_experiment(config: ExperimentConfig) -> None:
     ensure_empty_dir(logs_dir)
     ensure_empty_dir(predictions_dir)
     ensure_empty_dir(models_dir)
-
-    # Imprime e grava o cabeçalho com configurações e hora de início.
-    # O arquivo será reescrito ao final com fim/duração.
-    info_inicial = format_run_info(
-        config=config,
-        started_at=started_at,
-        dataset_in_use=dataset_to_use,
-    )
-    print(info_inicial)
-    write_run_info(info_inicial, logs_dir)
 
     # 2. Cria dir_Treino com todas as imagens (alimentará o treino do KNN)
     aT = cria_dir_treino(
@@ -209,35 +202,39 @@ def run_experiment(config: ExperimentConfig) -> None:
     all_run_metrics: list[RunMetrics] = []
     for x in range(config.inter):
         print(f"\nExecução:\t{x + 1}")
-        print("Training KNN classifier...", end="\t")
 
-        model_path = models_dir / f"run_{x + 1}_{MODEL_FILENAME}"
-        classifier = train(
-            dir_treino,
-            model_save_path=model_path,
-            n_neighbors=config.n_neighbors,
-            verbose=config.verbose,
-        )
-        print("Training complete!")
+        with report.time_run(run_number=x + 1) as timing:
+            print("Training KNN classifier...", end="\t")
 
-        # Salva imagens anotadas em uma subpasta por execução, se houver mais de uma
-        folder = predictions_dir / f"run_{x + 1}" if config.inter > 1 else predictions_dir / "imgs"
-        ensure_empty_dir(folder, erase=True)
+            model_path = models_dir / f"run_{x + 1}_{MODEL_FILENAME}"
+            classifier = train(
+                dir_treino,
+                model_save_path=model_path,
+                n_neighbors=config.n_neighbors,
+                verbose=config.verbose,
+            )
+            print("Training complete!")
 
-        rows = look_for_faces(
-            cam_img=dir_testes,
-            folder=folder,
-            aT=aT,
-            classifier=classifier,
-            distance_threshold=config.distance_threshold,
-        )
-        write_prediction_results(rows, logs_dir / f"predictions_run_{x + 1}.txt")
+            # Salva imagens anotadas em uma subpasta por execução, se houver mais de uma
+            folder = predictions_dir / f"run_{x + 1}" if config.inter > 1 else predictions_dir / "imgs"
+            ensure_empty_dir(folder, erase=True)
 
-        # Calcula e exibe as métricas desta execução
-        run_metrics = compute_metrics(rows, run_number=x + 1)
-        print(format_console_summary(run_metrics))
-        write_metrics_files(run_metrics, logs_dir)
-        all_run_metrics.append(run_metrics)
+            rows = look_for_faces(
+                cam_img=dir_testes,
+                folder=folder,
+                aT=aT,
+                classifier=classifier,
+                distance_threshold=config.distance_threshold,
+            )
+            write_prediction_results(rows, logs_dir / f"predictions_run_{x + 1}.txt")
+
+            # Calcula e exibe as métricas desta execução
+            run_metrics = compute_metrics(rows, run_number=x + 1)
+            print(format_console_summary(run_metrics))
+            write_metrics_files(run_metrics, logs_dir)
+            all_run_metrics.append(run_metrics)
+
+            timing.images_evaluated = run_metrics.global_metrics.total
 
         # Estatísticas por classe
         stats = pasta_info(aT)
@@ -280,16 +277,9 @@ def run_experiment(config: ExperimentConfig) -> None:
                 f"({(acertos_geral / total_geral) * 100:.2f}%)"
             )
 
-    # 7. Atualiza run_info.txt com fim e duração; imprime resumo de tempo
-    finished_at = datetime.now()
-    info_final = format_run_info(
-        config=config,
-        started_at=started_at,
-        finished_at=finished_at,
-        dataset_in_use=dataset_to_use,
-    )
-    write_run_info(info_final, logs_dir)
-    print("")
-    print(info_final)
+    # 7. Marca o fim do experimento, imprime resumo de tempos e grava run_info.txt
+    report.finish()
+    report.print_footer()
+    report.write_to_file(logs_dir)
 
     print(f"\nExperimento finalizado. Resultados em: {config.work_dir}")
